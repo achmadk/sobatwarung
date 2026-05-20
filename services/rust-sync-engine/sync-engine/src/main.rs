@@ -5,6 +5,7 @@ mod nats;
 mod crypto;
 mod error;
 mod state;
+mod redis;
 
 use crdt::document_store::DocumentStore;
 use error::SyncError;
@@ -35,6 +36,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let ws_addr = "[::1]:8080".parse()?;
 
     let app_state_clone = app_state.clone();
+
+    tokio::spawn(async move {
+        match redis::RedisStreamConsumer::new().await {
+            Ok(consumer) => {
+                info!("Redis Stream consumer started");
+                if let Err(e) = consumer.consume().await {
+                    tracing::error!("Redis Stream consumer error: {}", e);
+                }
+            }
+            Err(e) => {
+                tracing::error!("Failed to start Redis Stream consumer: {}", e);
+            }
+        }
+    });
 
     tokio::spawn(async move {
         let ws_handler = WebSocketHandler::new(app_state_clone);

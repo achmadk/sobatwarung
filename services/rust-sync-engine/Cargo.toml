@@ -24,6 +24,7 @@ tracing = "0.1"
 tracing-subscriber = "0.3"
 thiserror = "2.0"
 anyhow = "1.0"
+fred = { version = "6.0", features = ["tokio-comp", "streams", "client"] }
 
 [profile.release]
 opt-level = 3

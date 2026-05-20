@@ -8,6 +8,7 @@ import {
   updateOrderStatus,
   updateOrderStatusBySupplier,
 } from '@/services/order.service';
+import { notifyOrderCreated } from '@/services/whatsapp.service';
 import { successResponse, ApiError, ErrorCodes } from '@/api/response';
 import { OrderStatus } from '@prisma/client';
 import type { CreateOrderInput } from '@/services/order.service';
@@ -40,6 +41,10 @@ ordersRouter.post('/', async (c) => {
       items: data.items,
       notes: data.notes,
       roomId: data.roomId,
+    });
+
+    notifyOrderCreated(order.id).catch((err) => {
+      console.error('Failed to send WhatsApp notification for order:', err);
     });
 
     return c.json(successResponse(order), 201);

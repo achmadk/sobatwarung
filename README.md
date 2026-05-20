@@ -1,73 +1,199 @@
-# React + TypeScript + Vite
+# SobatWarung
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Independent Keagenan & Komunal Ecosystem**
 
-Currently, two official plugins are available:
+SobatWarung is an offline-first, decentralized digital ecosystem designed for mom-and-pop shops (warung) outside Java, Indonesia. It bridges the gap caused by unstable internet connectivity and high logistics costs through a resilient **Offline-First Data Architecture** combined with a local **Multi-Agent Smart Layer**.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+The platform organizes local supply networks into a three-tier **Keagenan (Agency) Framework**:
 
-## React Compiler
+- **Agen Utama** — Established local bulk-stores acting as transit inventory nodes
+- **Agen Mitra** — Neighborhood shops that source from Agen Utama
+- **Reseller** — Individuals selling via WhatsApp catalogs
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Frontend
 
-```js
-export default defineConfig([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
+- React 19 + TypeScript
+- Vite (via Vite+)
+- PWA with Workbox
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Backend (Phase 1)
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+- Node.js 22 LTS
+- Hono (lightweight API framework)
+- Prisma ORM + PostgreSQL 16
+- Redis 7 (cache & pub/sub)
+- Socket.IO (real-time WebSocket)
+- Baileys (WhatsApp integration)
+
+### Rust Service (Phase 2)
+
+- Rust + tokio (async runtime)
+- axum (HTTP framework)
+- yrs (CRDTs for offline sync)
+- NATS (messaging)
+- sqlx + PostgreSQL
+- tonic (gRPC)
+
+### DevOps
+
+- pnpm workspaces (monorepo)
+- Docker Compose (local dev)
+- Vite+ toolchain
+
+---
+
+## Monorepo Structure
+
+```
+sobatwarung/
+├── apps/
+│   ├── landing-page/        # Vite+React PWA (main landing page)
+│   ├── backend/            # Node.js/TypeScript API server
+│   └── web-pwa/            # PWA for Reseller/Pemasok/Etalase
+├── packages/
+│   ├── shared-types/       # TypeScript interfaces shared across apps
+│   └── sdk/                # Auto-generated API client from OpenAPI spec
+├── services/
+│   └── rust-sync-engine/   # Rust microservice (Phase 2)
+└── openspec/               # Change management
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Apps
 
-```js
-// eslint.config.js
-import reactX from "eslint-plugin-react-x";
-import reactDom from "eslint-plugin-react-dom";
+| App                 | Description                                            |
+| ------------------- | ------------------------------------------------------ |
+| `apps/landing-page` | Public landing page (Vite+React PWA)                   |
+| `apps/backend`      | REST API server (Hono + Prisma) with WebSocket support |
+| `apps/web-pwa`      | PWA for Reseller, Pemasok, and Etalase storefronts     |
 
-export default defineConfig([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs["recommended-typescript"],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+### Packages
+
+| Package                 | Description                                                       |
+| ----------------------- | ----------------------------------------------------------------- |
+| `packages/shared-types` | TypeScript interfaces (User, Order, BuyingRoom, AgentEvent, etc.) |
+| `packages/sdk`          | Auto-generated HTTP client from OpenAPI spec                      |
+
+### Services
+
+| Service                     | Description                             |
+| --------------------------- | --------------------------------------- |
+| `services/rust-sync-engine` | CRDT sync engine + crypto hub (Phase 2) |
+
+---
+
+## Quick Start
+
+### Prerequisites
+
+- Node.js 22+
+- pnpm 11+
+- Docker & Docker Compose (for local backend services)
+
+### Installation
+
+```bash
+pnpm install
 ```
+
+### Development Commands
+
+| Command              | Description                       |
+| -------------------- | --------------------------------- |
+| `pnpm dev:landing`   | Start landing page dev server     |
+| `pnpm dev:web-pwa`   | Start web PWA dev server          |
+| `pnpm dev:backend`   | Start backend dev server          |
+| `pnpm build:landing` | Build landing page for production |
+| `pnpm build:shared`  | Build shared types package        |
+| `pnpm build:all`     | Build all workspace packages      |
+| `pnpm lint`          | Lint all packages                 |
+| `pnpm typecheck`     | Type-check all packages           |
+| `pnpm format`        | Format all files via Oxlint       |
+
+### Running Backend Locally
+
+The backend requires PostgreSQL and Redis. Start them with Docker Compose:
+
+```bash
+cd apps/backend
+docker compose up -d postgres redis
+pnpm dev:backend
+```
+
+---
+
+## Backend API
+
+Base URL: `/api/v1`
+
+| Route              | Description                                  |
+| ------------------ | -------------------------------------------- |
+| `GET /health`      | Health check                                 |
+| `/api/v1/auth`     | Authentication (register, login, device key) |
+| `/api/v1/users`    | User management                              |
+| `/api/v1/rooms`    | Group buying rooms (Pengadaan Kolektif)      |
+| `/api/v1/orders`   | Order management                             |
+| `/api/v1/products` | Product catalog                              |
+| `/api/v1/etalase`  | Digital storefront (Etalase Tetangga)        |
+| `/api/v1/sync`     | Offline sync protocol                        |
+| `/api/v1/agents`   | Multi-agent system relay bus                 |
+
+---
+
+## Deployment
+
+### Frontends
+
+**Cloudflare Pages** — PWA apps deploy directly to Cloudflare's global edge network.
+
+### Backend (Phase 1)
+
+**Fly.io** — Deploy to Singapore region for optimal Indonesia coverage.
+
+```bash
+fly launch
+fly deploy
+```
+
+Alternative: Docker Compose with Cloudflare Tunnel for DDoS protection.
+
+### Rust Service (Phase 2)
+
+**Fly.io** — Container deployment with internal networking to backend.
+
+### Database
+
+**PostgreSQL 16** on Fly.io or Railway.
+
+---
+
+## Documentation
+
+- [PRD.md](./PRD.md) — Product vision, personas, and functional requirements
+- [PRD-BE.md](./PRD-BE.md) — Full technical architecture documentation
+- [PRD-P2.md](./PRD-P2.md) — Execution guide for Phase 2 Node.js ↔ Rust Integration
+- [AGENTS.md](./AGENTS.md) — Agent/skills configuration and developer tooling
+
+---
+
+## Architecture Highlights
+
+### Offline-First
+
+The system is designed to work seamlessly in low-connectivity environments. The backend sync protocol handles timestamp-based Last-Writer-Wins (LWWT) reconciliation, while the Phase 2 Rust service introduces CRDT-based conflict-free merging via `yrs`.
+
+### Multi-Agent System
+
+Autonomous software agents operate at the edge:
+
+- **Stock Agent** — Inventory tracking and restock prediction
+- **Community Agent** — Collective procurement negotiation
+- **Sales Agent** — Hyper-local micro-marketing
+- **Privacy-Guard Agent** — Edge security and encryption
+
+### Data Sovereignty
+
+All merchant data remains under merchant control. The Privacy-Guard Agent handles cryptographic signatures and strips sensitive identity tags before external sync.
