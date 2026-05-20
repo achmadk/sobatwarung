@@ -4,8 +4,44 @@ import { LoginPage, RegisterPage } from "./pages/auth/index.js";
 import { EtalasePage } from "./pages/etalase/index.js";
 import { ResellerDashboard } from "./pages/reseller/index.js";
 import { PemasokPortal } from "./pages/pemasok/index.js";
+import {
+  GroupBuyListPage,
+  GroupBuyRoomDetailPage,
+  CreateRoomPage,
+} from "./pages/group-buy/index.js";
+import { ToastProvider, useToast } from "./components/ToastProvider.js";
+import { useEffect } from "react";
+import type { SyncEvent } from "./services/sync.js";
 
-function ProtectedRoute({ children, allowedRoles }: { children: React.ReactNode; allowedRoles?: string[] }) {
+function SyncEventListener() {
+  const { showToast } = useToast();
+
+  useEffect(() => {
+    const handleSyncEvent = (event: CustomEvent<SyncEvent>) => {
+      const { type } = event.detail;
+      if (type === "sync_complete") {
+        showToast("Pesanan berhasil disinkronkan", "SUCCESS");
+      } else if (type === "sync_failed") {
+        showToast("Sinkronisasi gagal. Akan dicoba lagi otomatis.", "ERROR");
+      }
+    };
+
+    window.addEventListener("sobat-sync-event", handleSyncEvent as EventListener);
+    return () => {
+      window.removeEventListener("sobat-sync-event", handleSyncEvent as EventListener);
+    };
+  }, [showToast]);
+
+  return null;
+}
+
+function ProtectedRoute({
+  children,
+  allowedRoles,
+}: {
+  children: React.ReactNode;
+  allowedRoles?: string[];
+}) {
   const { isAuthenticated, isLoading, user } = useAuth();
 
   if (isLoading) {
@@ -24,10 +60,10 @@ function ProtectedRoute({ children, allowedRoles }: { children: React.ReactNode;
     return <Navigate to="/" replace />;
   }
 
-  return <>{children}</>;
+  return children;
 }
 
-function App() {
+function AppContent() {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
@@ -40,8 +76,8 @@ function App() {
 
   return (
     <Router>
+      <SyncEventListener />
       <Routes>
-        {/* Redirect root to appropriate dashboard or login */}
         <Route
           path="/"
           element={
@@ -53,14 +89,38 @@ function App() {
           }
         />
 
-        {/* Auth routes */}
         <Route path="/auth/login" element={<LoginPage />} />
         <Route path="/auth/register" element={<RegisterPage />} />
 
-        {/* Etalase Tetangga — public storefront */}
         <Route path="/etalase/:agenId" element={<EtalasePage />} />
 
-        {/* Reseller dashboard */}
+        <Route
+          path="/group-buy"
+          element={
+            <ProtectedRoute allowedRoles={["RESELLER", "AGEN_UTAMA", "AGEN_MITRA"]}>
+              <GroupBuyListPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/group-buy/create"
+          element={
+            <ProtectedRoute allowedRoles={["AGEN_UTAMA"]}>
+              <CreateRoomPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/group-buy/:roomId"
+          element={
+            <ProtectedRoute allowedRoles={["RESELLER", "AGEN_UTAMA", "AGEN_MITRA"]}>
+              <GroupBuyRoomDetailPage />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/reseller/*"
           element={
@@ -70,7 +130,6 @@ function App() {
           }
         />
 
-        {/* Pemasok portal */}
         <Route
           path="/pemasok/*"
           element={
@@ -80,10 +139,17 @@ function App() {
           }
         />
 
-        {/* Catch all - redirect to home */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
+  );
+}
+
+function App() {
+  return (
+    <ToastProvider>
+      <AppContent />
+    </ToastProvider>
   );
 }
 

@@ -190,6 +190,18 @@ class SobatWarungClient {
     return this.request<BuyingRoom[]>(`/api/v1/rooms${query}`);
   }
 
+  async createRoom(data: {
+    productId: string;
+    targetQuantity: number;
+    priceCeiling: number;
+    deadline: string;
+  }) {
+    return this.request<BuyingRoom>("/api/v1/rooms", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
   async getRoom(id: string) {
     return this.request<BuyingRoom>(`/api/v1/rooms/${id}`);
   }

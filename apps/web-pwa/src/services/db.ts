@@ -34,17 +34,28 @@ export interface SyncQueueItem {
   error?: string;
 }
 
+export interface OnboardingProgress {
+  id: string;
+  firstOrderCompleted: boolean;
+  firstOrderCompletedAt?: string;
+  firstGroupBuyCompleted: boolean;
+  firstGroupBuyCompletedAt?: string;
+  userId: string;
+}
+
 class SobatWarungDB extends Dexie {
   products!: Table<CachedProduct, string>;
   orders!: Table<CachedOrder, string>;
   syncQueue!: Table<SyncQueueItem, number>;
+  onboardingProgress!: Table<OnboardingProgress, string>;
 
   constructor() {
     super("SobatWarungDB");
-    this.version(1).stores({
+    this.version(2).stores({
       products: "id, category, hubId, cachedAt",
       orders: "id, status, createdAt",
       syncQueue: "++id, mutationId, entity, status",
+      onboardingProgress: "id, userId",
     });
   }
 }

@@ -98,6 +98,15 @@ export async function getRooms(hubId?: string) {
   return apiClient.getRooms(query);
 }
 
+export async function createRoom(data: {
+  productId: string;
+  targetQuantity: number;
+  priceCeiling: number;
+  deadline: string;
+}) {
+  return apiClient.createRoom(data);
+}
+
 export async function getRoom(id: string) {
   return apiClient.getRoom(id);
 }

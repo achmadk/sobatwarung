@@ -4,6 +4,16 @@ import { syncPush } from "./api";
 let isSyncing = false;
 const DEVICE_ID_KEY = "sobat_device_id";
 
+export interface SyncEvent {
+  type: "sync_complete" | "sync_failed" | "mutation_queued";
+  count?: number;
+  error?: string;
+}
+
+function emitSyncEvent(event: SyncEvent) {
+  window.dispatchEvent(new CustomEvent<SyncEvent>("sobat-sync-event", { detail: event }));
+}
+
 function getDeviceId(): string {
   let deviceId = localStorage.getItem(DEVICE_ID_KEY);
   if (!deviceId) {
@@ -29,6 +39,7 @@ export async function enqueueMutation(
     timestamp: new Date().toISOString(),
     status: "pending",
   });
+  emitSyncEvent({ type: "mutation_queued" });
   return mutationId;
 }
 
@@ -78,9 +89,17 @@ export async function processSyncQueue(): Promise<boolean> {
 
     localStorage.setItem("sobat_last_sync", result.serverTimestamp);
 
+    const failedCount = result.rejected.length;
+    if (failedCount > 0) {
+      emitSyncEvent({ type: "sync_failed", count: failedCount, error: "Some mutations failed to sync" });
+    } else {
+      emitSyncEvent({ type: "sync_complete", count: result.accepted.length });
+    }
+
     return true;
   } catch {
     await db.syncQueue.where("status").equals("syncing").modify({ status: "failed" });
+    emitSyncEvent({ type: "sync_failed", error: "Sync failed due to network error" });
     return false;
   } finally {
     isSyncing = false;
