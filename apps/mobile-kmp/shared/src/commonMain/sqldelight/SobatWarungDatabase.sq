@@ -1,0 +1,87 @@
+CREATE TABLE products (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT,
+    price INTEGER NOT NULL,
+    stock INTEGER NOT NULL DEFAULT 0,
+    low_stock_threshold INTEGER NOT NULL DEFAULT 10,
+    image_url TEXT,
+    category TEXT,
+    agen_utama_id TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    synced_at INTEGER
+);
+
+CREATE TABLE orders (
+    id TEXT PRIMARY KEY,
+    agen_mitra_id TEXT NOT NULL,
+    agen_utama_id TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'draft',
+    total_amount INTEGER NOT NULL DEFAULT 0,
+    notes TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    synced_at INTEGER
+);
+
+CREATE TABLE order_items (
+    id TEXT PRIMARY KEY,
+    order_id TEXT NOT NULL,
+    product_id TEXT NOT NULL,
+    quantity INTEGER NOT NULL,
+    unit_price INTEGER NOT NULL,
+    FOREIGN KEY (order_id) REFERENCES orders(id),
+    FOREIGN KEY (product_id) REFERENCES products(id)
+);
+
+CREATE TABLE inventory (
+    id TEXT PRIMARY KEY,
+    product_id TEXT NOT NULL,
+    quantity INTEGER NOT NULL,
+    last_checked INTEGER NOT NULL,
+    FOREIGN KEY (product_id) REFERENCES products(id)
+);
+
+CREATE TABLE sync_queue (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    table_name TEXT NOT NULL,
+    record_id TEXT NOT NULL,
+    operation TEXT NOT NULL,
+    payload TEXT NOT NULL,
+    timestamp INTEGER NOT NULL,
+    retry_count INTEGER NOT NULL DEFAULT 0,
+    status TEXT NOT NULL DEFAULT 'pending'
+);
+
+CREATE TABLE group_buying_rooms (
+    id TEXT PRIMARY KEY,
+    agen_utama_id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    description TEXT,
+    start_time INTEGER NOT NULL,
+    end_time INTEGER NOT NULL,
+    status TEXT NOT NULL DEFAULT 'active',
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    synced_at INTEGER
+);
+
+CREATE TABLE group_buying_participants (
+    id TEXT PRIMARY KEY,
+    room_id TEXT NOT NULL,
+    agen_mitra_id TEXT NOT NULL,
+    joined_at INTEGER NOT NULL,
+    FOREIGN KEY (room_id) REFERENCES group_buying_rooms(id)
+);
+
+CREATE TABLE sync_metadata (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+);
+
+CREATE INDEX idx_products_agen_utama ON products(agen_utama_id);
+CREATE INDEX idx_orders_agen_mitra ON orders(agen_mitra_id);
+CREATE INDEX idx_orders_agen_utama ON orders(agen_utama_id);
+CREATE INDEX idx_sync_queue_status ON sync_queue(status);
+CREATE INDEX idx_group_buying_participants_room ON group_buying_participants(room_id);

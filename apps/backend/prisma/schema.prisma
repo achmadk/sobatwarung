@@ -1,0 +1,139 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  AGEN_UTAMA
+  AGEN_MITRA
+  RESELLER
+  PEMASOK
+}
+
+enum RoomStatus {
+  OPEN
+  LOCKED
+  CHECKOUT
+  DISTRIBUTED
+}
+
+enum OrderStatus {
+  DRAFT
+  CONFIRMED
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+model User {
+  id              String    @id @default(uuid())
+  name            String
+  whatsapp        String    @unique
+  role            UserRole
+  passwordHash    String
+  devicePublicKey String   @default("")
+  hubId           String?
+  refreshToken    String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  createdRooms  BuyingRoom[]    @relation("RoomCreator")
+  participants  RoomParticipant[]
+  orders        Order[]
+  hub           Hub?            @relation("HubMembers", fields: [hubId], references: [id])
+  ownedHub      Hub?           @relation("HubOwner")
+  products      Product[]
+}
+
+model Hub {
+  id        String   @id @default(uuid())
+  name      String
+  address   String
+  latitude  Float?
+  longitude Float?
+  ownerId   String   @unique
+  owner     User     @relation("HubOwner", fields: [ownerId], references: [id])
+  createdAt DateTime @default(now())
+
+  users     User[]   @relation("HubMembers")
+  rooms     BuyingRoom[]
+}
+
+model BuyingRoom {
+  id              String     @id @default(uuid())
+  hubId           String
+  createdById     String
+  productName     String
+  targetQuantity  Int
+  priceCeiling    Decimal    @db.Decimal(12, 2)
+  currentQuantity Int        @default(0)
+  status          RoomStatus @default(OPEN)
+  deadline        DateTime
+  createdAt       DateTime   @default(now())
+  closedAt        DateTime?
+
+  hub          Hub              @relation(fields: [hubId], references: [id])
+  creator      User             @relation("RoomCreator", fields: [createdById], references: [id])
+  participants RoomParticipant[]
+  order        Order?
+}
+
+model RoomParticipant {
+  id        String   @id @default(uuid())
+  roomId    String
+  userId    String
+  quantity  Int
+  joinedAt  DateTime @default(now())
+
+  room BuyingRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, userId])
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  category    String
+  price       Decimal  @db.Decimal(12, 2)
+  unit        String
+  description String?
+  images      String[]
+  supplierId  String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  supplier User @relation(fields: [supplierId], references: [id])
+}
+
+model Order {
+  id             String      @id @default(uuid())
+  buyerId        String
+  roomId         String?
+  items          Json
+  totalAmount    Decimal     @db.Decimal(12, 2)
+  status         OrderStatus @default(DRAFT)
+  notes          String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  buyer User        @relation(fields: [buyerId], references: [id])
+  room  BuyingRoom? @relation(fields: [roomId], references: [id], onDelete: SetNull)
+
+  @@unique([roomId])
+}
+
+model SyncQueue {
+  id         String   @id @default(uuid())
+  deviceId   String
+  mutations  Json
+  receivedAt DateTime @default(now())
+  processed  Boolean  @default(false)
+  error      String?
+}

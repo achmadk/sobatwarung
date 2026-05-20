@@ -1,0 +1,70 @@
+version: "3.8"
+
+networks:
+  frontend-net:
+    driver: bridge
+  backend-net:
+    driver: bridge
+
+volumes:
+  pg-data:
+  redis-data:
+  whatsapp-data:
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: sobatuser
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-sobatpassword}
+      POSTGRES_DB: soalbatwarung
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    networks:
+      - backend-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sobatuser -d soalbatwarung"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis-data:/data
+    networks:
+      - backend-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://sobatuser:${DB_PASSWORD:-sobatpassword}@postgres:5432/soalbatwarung
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-change-this-to-a-secure-secret-at-least-32-chars}
+      JWT_EXPIRY: 15m
+      REFRESH_TOKEN_EXPIRY: 7d
+      WHATSAPP_SESSION_DIR: /data/whatsapp-sessions
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
+      PORT: 3000
+      NODE_ENV: production
+    volumes:
+      - whatsapp-data:/data/whatsapp-sessions
+    networks:
+      - backend-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped

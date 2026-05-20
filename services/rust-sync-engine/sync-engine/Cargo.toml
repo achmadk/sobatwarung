@@ -1,0 +1,35 @@
+[package]
+name = "sync-engine"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+tokio.workspace = true
+axum.workspace = true
+tonic.workspace = true
+prost.workspace = true
+sqlx.workspace = true
+yrs.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+
+async-trait = "0.1"
+tokio-tungstenite = "0.26"
+futures-util = "0.3"
+tower = "0.5"
+tower-http = { version = "0.6", features = ["cors", "trace"] }
+jsonwebtoken = "9"
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1", features = ["v4", "serde"] }
+
+[dev-dependencies]
+tokio-test = "0.4"
+mockall = "0.13"
+
+[[bin]]
+name = "sync-engine"
+path = "src/main.rs"

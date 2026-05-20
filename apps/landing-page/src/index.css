@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+@theme {
+  --color-sobatGreen-50: #f0fdf4;
+  --color-sobatGreen-100: #dcfce7;
+  --color-sobatGreen-500: #22c55e;
+  --color-sobatGreen-600: #16a34a;
+  --color-sobatGreen-700: #15803d;
+  --color-sobatGreen-800: #166534;
+  --color-sobatGreen-900: #14532d;
+}
+
+@layer base {
+  body {
+    @apply antialiased text-slate-800 bg-slate-50;
+  }
+}

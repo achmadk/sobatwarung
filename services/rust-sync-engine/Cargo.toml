@@ -1,0 +1,31 @@
+[workspace]
+resolver = "2"
+members = [
+    "sync-engine",
+    "sync-crypto",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["Sobat Warung Team"]
+
+[workspace.dependencies]
+tokio = { version = "1.40", features = ["full"] }
+axum = "0.7"
+tonic = "0.12"
+prost = "0.13"
+sqlx = { version = "0.8", features = ["runtime-tokio", "postgres", "migrate"] }
+yrs = "0.25"
+nats = "0.26"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+thiserror = "2.0"
+anyhow = "1.0"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1

@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package sync;
+
+service SyncService {
+    rpc SyncBatch(SyncBatchRequest) returns (SyncBatchResponse);
+    rpc GetState(GetStateRequest) returns (GetStateResponse);
+    rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+}
+
+message Mutation {
+    string id = 1;
+    string entity_type = 2;
+    string entity_id = 3;
+    bytes payload = 4;
+    map<string, int64> vector_clock = 5;
+    int64 timestamp = 6;
+}
+
+message SyncBatchRequest {
+    string agency_id = 1;
+    string client_id = 2;
+    string batch_id = 3;
+    repeated Mutation mutations = 4;
+}
+
+message Conflict {
+    string entity_id = 1;
+    string entity_type = 2;
+    int64 server_timestamp = 3;
+    int64 client_timestamp = 4;
+    string resolution = 5;
+}
+
+message SyncBatchResponse {
+    string batch_id = 1;
+    bytes merged_state = 2;
+    repeated Conflict conflicts = 3;
+    int64 sync_timestamp = 4;
+}
+
+message GetStateRequest {
+    string agency_id = 1;
+    string client_id = 2;
+}
+
+message GetStateResponse {
+    bytes state = 1;
+    int64 sync_timestamp = 2;
+}
+
+message HealthCheckRequest {}
+
+message HealthCheckResponse {
+    bool serving = 1;
+    map<string, string> dependencies = 2;
+}

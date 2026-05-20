@@ -1,0 +1,27 @@
+{
+  "name": "sobatwarung",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev:landing": "pnpm --filter @sobatwarung/landing-page dev",
+    "build:landing": "pnpm --filter @sobatwarung/landing-page build",
+    "build:shared": "pnpm --filter @sobatwarung/shared-types build",
+    "build:all": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "format": "vp check --fix",
+    "clean": "pnpm -r exec rm -rf dist"
+  },
+  "packageManager": "pnpm@11.1.2",
+  "pnpm": {
+    "overrides": {
+      "vite": "npm:@voidzero-dev/vite-plus-core@latest",
+      "vitest": "npm:@voidzero-dev/vite-plus-test@latest"
+    }
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.3.0",
+    "tailwindcss": "^4.3.0"
+  }
+}

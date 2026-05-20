@@ -1,0 +1,13 @@
+{
+  "name": "SobatWarung — Etalase & Reseller",
+  "short_name": "SobatWarung",
+  "description": "Platform keagenan digital untuk warung Indonesia",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f0fdf4",
+  "theme_color": "#14532d",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
