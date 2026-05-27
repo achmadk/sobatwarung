@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev:landing": "pnpm --filter @sobatwarung/landing-page dev",
+    "dev:backend": "pnpm --filter @sobatwarung/backend dev",
+    "dev:web-pwa": "pnpm --filter @sobatwarung/web-pwa dev",
     "build:landing": "pnpm --filter @sobatwarung/landing-page build",
     "build:shared": "pnpm --filter @sobatwarung/shared-types build",
     "build:all": "pnpm -r build",
@@ -13,7 +15,7 @@
     "format": "vp check --fix",
     "clean": "pnpm -r exec rm -rf dist"
   },
-  "packageManager": "pnpm@11.1.2",
+  "packageManager": "pnpm@11.4.0",
   "pnpm": {
     "overrides": {
       "vite": "npm:@voidzero-dev/vite-plus-core@latest",

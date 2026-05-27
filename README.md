@@ -52,11 +52,12 @@ The platform organizes local supply networks into a three-tier **Keagenan (Agenc
 sobatwarung/
 ├── apps/
 │   ├── landing-page/        # Vite+React PWA (main landing page)
-│   ├── backend/            # Node.js/TypeScript API server
-│   └── web-pwa/            # PWA for Reseller/Pemasok/Etalase
+│   ├── backend/             # Node.js/TypeScript API server
+│   ├── web-pwa/             # PWA for Reseller/Pemasok/Etalase
+│   └── mobile-kmp/          # Kotlin Multiplatform mobile app (Phase 2)
 ├── packages/
 │   ├── shared-types/       # TypeScript interfaces shared across apps
-│   └── sdk/                # Auto-generated API client from OpenAPI spec
+│   └── sdk/                # TypeScript HTTP client library
 ├── services/
 │   └── rust-sync-engine/   # Rust microservice (Phase 2)
 └── openspec/               # Change management
@@ -69,13 +70,14 @@ sobatwarung/
 | `apps/landing-page` | Public landing page (Vite+React PWA)                   |
 | `apps/backend`      | REST API server (Hono + Prisma) with WebSocket support |
 | `apps/web-pwa`      | PWA for Reseller, Pemasok, and Etalase storefronts     |
+| `apps/mobile-kmp`   | Kotlin Multiplatform mobile app for Agen Utama & Agen Mitra (Phase 2) |
 
 ### Packages
 
 | Package                 | Description                                                       |
 | ----------------------- | ----------------------------------------------------------------- |
 | `packages/shared-types` | TypeScript interfaces (User, Order, BuyingRoom, AgentEvent, etc.) |
-| `packages/sdk`          | Auto-generated HTTP client from OpenAPI spec                      |
+| `packages/sdk`          | TypeScript HTTP client library                                     |
 
 ### Services
 
@@ -175,6 +177,7 @@ Alternative: Docker Compose with Cloudflare Tunnel for DDoS protection.
 - [PRD.md](./PRD.md) — Product vision, personas, and functional requirements
 - [PRD-BE.md](./PRD-BE.md) — Full technical architecture documentation
 - [PRD-P2.md](./PRD-P2.md) — Execution guide for Phase 2 Node.js ↔ Rust Integration
+- [PRD-UX.md](./PRD-UX.md) — User experience specifications for the web PWA
 - [AGENTS.md](./AGENTS.md) — Agent/skills configuration and developer tooling
 
 ---
