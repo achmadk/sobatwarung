@@ -1,6 +1,5 @@
 import { Users, WifiOff, TrendingDown, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
-import WarungIllustration from "./WarungIllustration";
 
 export default function Hero() {
   return (
@@ -53,7 +52,7 @@ export default function Hero() {
         </div>
         <div className="relative">
           <div className="absolute inset-0 bg-yellow-400 rounded-3xl transform rotate-3 scale-105 opacity-20"></div>
-          <WarungIllustration />
+          <img src="/assets/hero.png" />
         </div>
       </div>
     </section>
